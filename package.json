@@ -1,0 +1,20 @@
+{
+  "name": "easymathprint-ssg",
+  "version": "1.0.0",
+  "description": "Static Site Generator for EasyMathPrint.com",
+  "main": "build.js",
+  "scripts": {
+    "build": "node build.js",
+    "serve": "cd dist && python3 -m http.server 8000"
+  },
+  "keywords": [
+    "math",
+    "worksheets",
+    "static-site-generator"
+  ],
+  "author": "",
+  "license": "MIT"
+}
+
+
+
