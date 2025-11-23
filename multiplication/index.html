@@ -3,16 +3,723 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- 这些占位符会由 build 脚本替换 -->
     <title>Multiplication Worksheets | EasyMathPrint</title>
-    <meta name="description" content="Free printable multiplication tables and practice worksheets. Builds foundational math skills.">
-    <link rel="canonical" href="https://www.easymathprint.com/multiplication/" />
-    <script>
-        window.PAGE_ID = "multiplication";
-    </script>
-    <link rel="stylesheet" href="/style.css">
+    <meta name="description" content="Multiplication tables and practice. Builds foundational math skills.">
+    <link rel="canonical" href="https://www.easymathprint.com/multiplication/">
+
+    <!-- TailwindCSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Screen-only styles */
+        @media screen {
+            #answer-key {
+                display: none;
+            }
+
+            #answer-key.show-answers {
+                display: block;
+            }
+        }
+
+        /* Worksheet page styling */
+        .worksheet-page {
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        @media screen {
+            .worksheet-page {
+                max-width: 800px;
+                padding: 2rem;
+            }
+        }
+
+        /* Problem grid */
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 768px) {
+            .problem-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .problem-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* Problem styling */
+        .problem {
+            font-size: 1.25rem;
+            padding: 0.75rem;
+            border-bottom: 2px dotted #ccc;
+        }
+
+        .problem-number {
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        .answer-blank {
+            border-bottom: 2px solid #000;
+            min-width: 60px;
+            display: inline-block;
+            text-align: center;
+            margin: 0 0.25rem;
+        }
+
+        .answer-value {
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        /* Homepage grid (在模板里其实用不到，但保留不影响) */
+        .homepage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .worksheet-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            display: block;
+            color: inherit;
+        }
+
+        .worksheet-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .worksheet-card h3 {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #1f2937;
+        }
+
+        .worksheet-card p {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        /* Back button */
+        .back-button {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+        }
+
+        /* Print Styles - Final Print Patch v3 */
+        @media print {
+            @page {
+                size: Letter;
+                margin: 12mm;
+            }
+
+            html, body {
+                margin: 0 !important;
+                padding: 0 !important;
+                height: auto !important;
+            }
+
+            .page {
+                page-break-inside: avoid;
+                break-inside: avoid-page;
+                margin-bottom: 16px;
+            }
+
+            #student-sheet {
+                page-break-before: avoid;
+            }
+
+            #answer-key {
+                page-break-before: always;
+                break-before: page;
+                page-break-after: avoid;
+            }
+
+            /* Hide UI in print */
+            .no-print, aside, button, select, .back-button {
+                display: none !important;
+            }
+
+            * {
+                background: transparent !important;
+                box-shadow: none !important;
+            }
+        }
+    </style>
 </head>
-<body>
-    <div id="app"></div>
-    <script src="/main.js"></script>
+<body class="bg-gray-100 min-h-screen">
+    <div id="app-container" class="container mx-auto px-4 py-6">
+        <!-- 内容由 JS 渲染，这里留空即可 -->
+    </div>
+
+    <script>
+        // ============================================
+        // 当前页面的 ID（由 build 脚本用具体的 id 替换）
+        // 例如：addition / rounding / fractions ...
+        // ============================================
+        const CURRENT_ID = "multiplication";
+
+        // ============================================
+        // WORKSHEET CONFIGURATION
+        // ============================================
+        const worksheetConfig = {
+            "addition": {
+                title: "Addition Worksheets",
+                icon: "➕",
+                type: "addition",
+                defaultRange: 20,
+                defaultCount: 20,
+                description: "Addition practice for Grades K–3. Perfect for building basic math skills.",
+                ranges: [10, 20, 50, 100],
+                counts: [10, 20, 30]
+            },
+            "subtraction": {
+                title: "Subtraction Worksheets",
+                icon: "➖",
+                type: "subtraction",
+                defaultRange: 20,
+                defaultCount: 20,
+                description: "Subtraction practice with no negative results. Great for early learners.",
+                ranges: [10, 20, 50, 100],
+                counts: [10, 20, 30]
+            },
+            "multiplication": {
+                title: "Multiplication Worksheets",
+                icon: "✖️",
+                type: "multiplication",
+                defaultRange: 12,
+                defaultCount: 20,
+                description: "Multiplication tables and practice. Builds foundational math skills.",
+                ranges: [5, 10, 12, 20],
+                counts: [10, 20, 30]
+            },
+            "division": {
+                title: "Division Worksheets",
+                icon: "➗",
+                type: "division",
+                defaultRange: 12,
+                defaultCount: 20,
+                description: "Division practice with whole number results. Perfect for grades 3–5.",
+                ranges: [5, 10, 12, 20],
+                counts: [10, 20, 30]
+            },
+            "mixed": {
+                title: "Mixed Operations Worksheets",
+                icon: "🔀",
+                type: "mixed",
+                defaultRange: 20,
+                defaultCount: 20,
+                description: "Mixed addition, subtraction, multiplication, and division problems.",
+                ranges: [10, 20, 50, 100],
+                counts: [10, 20, 30]
+            },
+            "fractions": {
+                title: "Fraction Worksheets",
+                icon: "🔢",
+                type: "fractions",
+                defaultRange: 10,
+                defaultCount: 20,
+                description: "Fraction addition and subtraction with like denominators.",
+                ranges: [10, 20],
+                counts: [10, 20, 30]
+            },
+            "place-value": {
+                title: "Place Value Worksheets",
+                icon: "🔢",
+                type: "place-value",
+                defaultRange: 999,
+                defaultCount: 20,
+                description: "Ones, tens, hundreds, and thousands place value practice.",
+                ranges: [999, 9999],
+                counts: [10, 20, 30]
+            },
+            "number-line": {
+                title: "Number Line Worksheets",
+                icon: "📏",
+                type: "number-line",
+                defaultRange: 50,
+                defaultCount: 10,
+                description: "Skip counting and missing numbers on number lines.",
+                ranges: [20, 50, 100],
+                counts: [5, 10]
+            },
+            "money-counting": {
+                title: "Money Counting Worksheets",
+                icon: "💰",
+                type: "money-counting",
+                defaultRange: 20,
+                defaultCount: 20,
+                description: "US coins and bills counting practice.",
+                ranges: [10, 20],
+                counts: [10, 20, 30]
+            },
+            "measurement": {
+                title: "Measurement Worksheets",
+                icon: "📏",
+                type: "measurement",
+                defaultRange: 100,
+                defaultCount: 20,
+                description: "Length, weight, and capacity conversions.",
+                ranges: [50, 100],
+                counts: [10, 20, 30]
+            },
+            "comparing-numbers": {
+                title: "Comparing Numbers Worksheets",
+                icon: "🔢",
+                type: "comparing-numbers",
+                defaultRange: 100,
+                defaultCount: 20,
+                description: "Greater than, less than, and equal to practice.",
+                ranges: [20, 100, 1000],
+                counts: [10, 20, 30]
+            },
+            "patterns": {
+                title: "Number Pattern Worksheets",
+                icon: "🔄",
+                type: "patterns",
+                defaultRange: 20,
+                defaultCount: 20,
+                description: "Addition, subtraction, multiplication, and division patterns.",
+                ranges: [10, 20],
+                counts: [10, 20, 30]
+            },
+            "bar-graphs": {
+                title: "Bar Graph Worksheets",
+                icon: "📊",
+                type: "bar-graphs",
+                defaultRange: 10,
+                defaultCount: 5,
+                description: "Reading and interpreting bar graphs.",
+                ranges: [10, 20],
+                counts: [5, 10]
+            },
+            "tally-charts": {
+                title: "Tally Chart Worksheets",
+                icon: "📊",
+                type: "tally-charts",
+                defaultRange: 20,
+                defaultCount: 5,
+                description: "Counting with tally marks and frequency tables.",
+                ranges: [5, 10, 20],
+                counts: [5, 10]
+            },
+            "probability": {
+                title: "Probability Worksheets",
+                icon: "🎲",
+                type: "probability",
+                defaultRange: 6,
+                defaultCount: 10,
+                description: "Basic probability with spinners and bags.",
+                ranges: [6, 10],
+                counts: [10, 20]
+            },
+            "coordinate-plane": {
+                title: "Coordinate Plane Worksheets",
+                icon: "📍",
+                type: "coordinate-plane",
+                defaultRange: 20,
+                defaultCount: 10,
+                description: "Plotting and identifying points in quadrant I.",
+                ranges: [10, 20],
+                counts: [10, 20]
+            },
+            "factors-multiples": {
+                title: "Factors & Multiples Worksheets",
+                icon: "🔢",
+                type: "factors-multiples",
+                defaultRange: 100,
+                defaultCount: 20,
+                description: "Finding factors, multiples, and prime numbers.",
+                ranges: [50, 100],
+                counts: [10, 20, 30]
+            },
+            "area-perimeter": {
+                title: "Area & Perimeter Worksheets",
+                icon: "📐",
+                type: "area-perimeter",
+                defaultRange: 20,
+                defaultCount: 10,
+                description: "Calculating area and perimeter of rectangles and squares.",
+                ranges: [10, 20],
+                counts: [10, 20]
+            },
+            "fraction-multiply": {
+                title: "Fraction Multiplication Worksheets",
+                icon: "✖️",
+                type: "fraction-multiply",
+                defaultRange: 9,
+                defaultCount: 20,
+                description: "Multiplying simple and mixed fractions.",
+                ranges: [9],
+                counts: [10, 20, 30]
+            },
+            "decimals": {
+                title: "Decimal Worksheets",
+                icon: "🔢",
+                type: "decimals",
+                defaultRange: 2,
+                defaultCount: 20,
+                description: "Decimal addition, subtraction, multiplication, and division.",
+                ranges: [1, 2],
+                counts: [10, 20, 30]
+            },
+            "symmetry": {
+                title: "Symmetry Worksheets",
+                icon: "🔄",
+                type: "symmetry",
+                defaultRange: 4,
+                defaultCount: 10,
+                description: "Identifying and drawing lines of symmetry.",
+                ranges: [3, 4],
+                counts: [10, 20]
+            },
+            "rounding": {
+                title: "Rounding Worksheets",
+                icon: "🔢",
+                type: "rounding",
+                defaultRange: 100,
+                defaultCount: 20,
+                description: "Rounding whole numbers and decimals.",
+                ranges: [10, 100, 1000],
+                counts: [10, 20, 30]
+            }
+        };
+
+        // ============================================
+        // STATE
+        // ============================================
+        let currentQuestions = [];
+        let answersVisible = false;
+        let currentWorksheetId = null;
+
+        // ============================================
+        // UTILITY FUNCTIONS
+        // ============================================
+        function randomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        // ============================================
+        // WORKSHEET GENERATION LOGIC
+        // ============================================
+        function generateQuestion(operator, maxRange) {
+            let a, b, answer;
+
+            switch (operator) {
+                case '+':
+                    a = randomInt(1, maxRange);
+                    b = randomInt(1, maxRange);
+                    answer = a + b;
+                    break;
+
+                case '-':
+                    a = randomInt(2, maxRange);
+                    b = randomInt(1, a);
+                    answer = a - b;
+                    break;
+
+                case '*':
+                    a = randomInt(1, Math.min(12, maxRange));
+                    b = randomInt(1, Math.min(12, maxRange));
+                    answer = a * b;
+                    break;
+
+                case '/':
+                    b = randomInt(2, Math.min(12, maxRange));
+                    const quotient = randomInt(1, Math.floor(maxRange / b));
+                    a = b * quotient;
+                    answer = quotient;
+                    break;
+
+                default:
+                    const operators = ['+', '-', '*', '/'];
+                    const op = operators[randomInt(0, operators.length - 1)];
+                    return generateQuestion(op, maxRange);
+            }
+
+            return { a, b, operator, answer };
+        }
+
+        function generateQuestions() {
+            const config = worksheetConfig[currentWorksheetId];
+            if (!config) return;
+
+            const maxRange = parseInt(document.getElementById('range').value, 10);
+            const count = parseInt(document.getElementById('count').value, 10);
+
+            const questions = [];
+            let operator;
+
+            if (config.type === 'addition') operator = '+';
+            else if (config.type === 'subtraction') operator = '-';
+            else if (config.type === 'multiplication') operator = '*';
+            else if (config.type === 'division') operator = '/';
+            else operator = 'mixed';
+
+            for (let i = 0; i < count; i++) {
+                questions.push(generateQuestion(operator, maxRange));
+            }
+
+            currentQuestions = questions;
+            renderWorksheetContent();
+        }
+
+        function renderWorksheetContent() {
+            const studentContainer = document.getElementById('student-problems');
+            const answerContainer = document.getElementById('answer-problems');
+
+            if (!studentContainer || !answerContainer) return;
+
+            studentContainer.innerHTML = '';
+            answerContainer.innerHTML = '';
+
+            const operatorSymbols = {
+                '+': '+',
+                '-': '−',
+                '*': '×',
+                '/': '÷'
+            };
+
+            currentQuestions.forEach((q, index) => {
+                const problemDiv = document.createElement('div');
+                problemDiv.className = 'problem';
+
+                const problemNumber = document.createElement('span');
+                problemNumber.className = 'problem-number';
+                problemNumber.textContent = `${index + 1}.`;
+
+                const problemText = document.createElement('span');
+                problemText.innerHTML = `${q.a} ${operatorSymbols[q.operator] || q.operator} ${q.b} = <span class="answer-blank"></span>`;
+
+                problemDiv.appendChild(problemNumber);
+                problemDiv.appendChild(problemText);
+                studentContainer.appendChild(problemDiv);
+            });
+
+            currentQuestions.forEach((q, index) => {
+                const problemDiv = document.createElement('div');
+                problemDiv.className = 'problem';
+
+                const problemNumber = document.createElement('span');
+                problemNumber.className = 'problem-number';
+                problemNumber.textContent = `${index + 1}.`;
+
+                const problemText = document.createElement('span');
+                problemText.innerHTML = `${q.a} ${operatorSymbols[q.operator] || q.operator} ${q.b} = <span class="answer-value">${q.answer}</span>`;
+
+                problemDiv.appendChild(problemNumber);
+                problemDiv.appendChild(problemText);
+                answerContainer.appendChild(problemDiv);
+            });
+        }
+
+        // ============================================
+        // ANSWER TOGGLE
+        // ============================================
+        function toggleAnswers() {
+            answersVisible = !answersVisible;
+            const answerKey = document.getElementById('answer-key');
+            const btn = document.getElementById('toggle-answers-btn');
+            if (!answerKey || !btn) return;
+
+            const icon = btn.querySelector('i');
+            const span = btn.querySelector('span');
+
+            if (answersVisible) {
+                answerKey.classList.add('show-answers');
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+                if (span) span.textContent = 'Hide Answers';
+            } else {
+                answerKey.classList.remove('show-answers');
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+                if (span) span.textContent = 'Show/Hide Answers';
+            }
+        }
+
+        // ============================================
+        // WORKSHEET PAGE RENDERER
+        // ============================================
+        function renderWorksheet(id) {
+            const config = worksheetConfig[id];
+            if (!config) return;
+
+            currentWorksheetId = id;
+
+            const container = document.getElementById('app-container');
+            container.innerHTML = `
+                <div class="relative">
+                    <a href="/" class="back-button no-print bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors flex items-center gap-2">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>Back to Home</span>
+                    </a>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-6 mt-4">
+                    <!-- Sidebar (Control Panel) -->
+                    <aside class="no-print w-full md:w-80 flex-shrink-0">
+                        <div class="bg-white rounded-lg shadow-lg p-6 space-y-6">
+                            <!-- Title -->
+                            <h1 class="text-3xl font-bold text-center mb-6">
+                                ${config.icon} ${config.title}
+                            </h1>
+
+                            <!-- Number Range -->
+                            <div>
+                                <label class="block text-sm font-semibold mb-2">Number Range</label>
+                                <select id="range" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    ${config.ranges.map(r => {
+                                        const label =
+                                            r === 5 ? '1–5' :
+                                            r === 9 ? '1–9' :
+                                            r === 10 ? '1–10' :
+                                            r === 12 ? '1–12' :
+                                            r === 20 ? '1–20' :
+                                            r === 50 ? '1–50' :
+                                            r === 100 ? '1–100' :
+                                            r === 999 ? '10–999' :
+                                            r === 9999 ? '100–9999' :
+                                            `1–${r}`;
+                                        return `<option value="${r}" ${r === config.defaultRange ? 'selected' : ''}>${label}</option>`;
+                                    }).join('')}
+                                </select>
+                            </div>
+
+                            <!-- Question Count -->
+                            <div>
+                                <label class="block text-sm font-semibold mb-2">Question Count</label>
+                                <select id="count" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                    ${config.counts.map(c =>
+                                        `<option value="${c}" ${c === config.defaultCount ? 'selected' : ''}>${c}</option>`
+                                    ).join('')}
+                                </select>
+                            </div>
+
+                            <!-- Buttons -->
+                            <div class="space-y-3">
+                                <button id="generate-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                    <i class="fas fa-magic"></i>
+                                    <span>Generate Worksheet</span>
+                                </button>
+
+                                <button id="print-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                    <i class="fas fa-print"></i>
+                                    <span>Print / Save PDF</span>
+                                </button>
+
+                                <button id="toggle-answers-btn" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
+                                    <i class="fas fa-eye"></i>
+                                    <span>Show/Hide Answers</span>
+                                </button>
+                            </div>
+
+                            <!-- Ad Box -->
+                            <div class="bg-gray-200 rounded-lg flex items-center justify-center" style="width: 300px; height: 250px; margin: 0 auto;">
+                                <span class="text-gray-500 font-semibold">Ad Space</span>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <!-- Worksheet Area -->
+                    <main class="flex-1">
+                        <div id="worksheet-container" class="space-y-6">
+                            <!-- Student Sheet (Page 1) -->
+                            <div id="student-sheet" class="worksheet-page page">
+                                <div class="mb-6">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <div class="flex-1">
+                                            <div class="mb-2">
+                                                <span class="font-semibold">Name:</span>
+                                                <span class="border-b-2 border-black inline-block min-w-[200px] ml-2"></span>
+                                            </div>
+                                            <div class="mb-2">
+                                                <span class="font-semibold">Date:</span>
+                                                <span class="border-b-2 border-black inline-block min-w-[200px] ml-2"></span>
+                                            </div>
+                                            <div>
+                                                <span class="font-semibold">Score:</span>
+                                                <span class="border-b-2 border-black inline-block min-w-[200px] ml-2"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="problem-grid" id="student-problems">
+                                    <!-- Problems will be generated here -->
+                                </div>
+                            </div>
+
+                            <!-- Answer Key (Page 2) -->
+                            <div id="answer-key" class="worksheet-page page">
+                                <h2 class="text-2xl font-bold mb-6 text-center">Answer Key</h2>
+                                <div class="problem-grid" id="answer-problems">
+                                    <!-- Answers will be generated here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer -->
+                        <footer class="no-print text-center mt-8 text-gray-600 text-sm">
+                            Generated for free at EasyMathPrint.com — © <span id="year"></span>
+                        </footer>
+                    </main>
+                </div>
+            `;
+
+            const yearEl = document.getElementById('year');
+            if (yearEl) {
+                yearEl.textContent = new Date().getFullYear();
+            }
+
+            document.getElementById('generate-btn').addEventListener('click', generateQuestions);
+            document.getElementById('print-btn').addEventListener('click', () => window.print());
+            document.getElementById('toggle-answers-btn').addEventListener('click', toggleAnswers);
+
+            generateQuestions();
+        }
+
+        // ============================================
+        // MAIN
+        // ============================================
+        function init() {
+            // 替换后的页面里，CURRENT_ID 会是具体的 id
+            const id = CURRENT_ID && CURRENT_ID !== "multiplication" ? CURRENT_ID : null;
+
+            if (id && worksheetConfig[id]) {
+                renderWorksheet(id);
+            } else {
+                // 理论上不会走到这里（模板专门给子页面用）
+                // 如果真走到了，就随便渲染一个 addition，避免空白页
+                renderWorksheet("addition");
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
 </body>
 </html>
