@@ -3,30 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <!-- 这些占位符会由 build 脚本替换 -->
-    <title>Subtraction Worksheets | EasyMathPrint</title>
+    <title>Subtraction Worksheets | EasyMathPrint | EasyMathPrint</title>
     <meta name="description" content="Subtraction practice with no negative results. Great for early learners.">
     <link rel="canonical" href="https://www.easymathprint.com/subtraction/">
-
+    
     <!-- TailwindCSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-
+    
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    
     <style>
         /* Screen-only styles */
         @media screen {
             #answer-key {
                 display: none;
             }
-
+            
             #answer-key.show-answers {
                 display: block;
             }
         }
-
+        
         /* Worksheet page styling */
         .worksheet-page {
             background: white;
@@ -34,45 +32,45 @@
             margin: 0 auto;
             padding: 1rem;
         }
-
+        
         @media screen {
             .worksheet-page {
                 max-width: 800px;
                 padding: 2rem;
             }
         }
-
+        
         /* Problem grid */
         .problem-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1.5rem;
         }
-
+        
         @media (min-width: 768px) {
             .problem-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
-
+        
         @media (min-width: 1024px) {
             .problem-grid {
                 grid-template-columns: repeat(3, 1fr);
             }
         }
-
+        
         /* Problem styling */
         .problem {
             font-size: 1.25rem;
             padding: 0.75rem;
             border-bottom: 2px dotted #ccc;
         }
-
+        
         .problem-number {
             font-weight: bold;
             margin-right: 0.5rem;
         }
-
+        
         .answer-blank {
             border-bottom: 2px solid #000;
             min-width: 60px;
@@ -80,56 +78,19 @@
             text-align: center;
             margin: 0 0.25rem;
         }
-
+        
         .answer-value {
             color: #dc2626;
             font-weight: bold;
         }
-
-        /* Homepage grid (在模板里其实用不到，但保留不影响) */
-        .homepage-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2rem;
-        }
-
-        .worksheet-card {
-            background: white;
-            border-radius: 8px;
-            padding: 1.5rem;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            transition: transform 0.2s, box-shadow 0.2s;
-            cursor: pointer;
-            text-decoration: none;
-            display: block;
-            color: inherit;
-        }
-
-        .worksheet-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        .worksheet-card h3 {
-            font-size: 1.25rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-            color: #1f2937;
-        }
-
-        .worksheet-card p {
-            color: #6b7280;
-            font-size: 0.9rem;
-        }
-
+        
         /* Back button */
         .back-button {
             position: absolute;
             top: 1rem;
             right: 1rem;
         }
-
+        
         /* Print Styles - Final Print Patch v3 */
         @media print {
             @page {
@@ -160,7 +121,7 @@
             }
 
             /* Hide UI in print */
-            .no-print, aside, button, select, .back-button {
+            .no-print, aside, button, select {
                 display: none !important;
             }
 
@@ -173,13 +134,12 @@
 </head>
 <body class="bg-gray-100 min-h-screen">
     <div id="app-container" class="container mx-auto px-4 py-6">
-        <!-- 内容由 JS 渲染，这里留空即可 -->
+        <!-- Content will be dynamically rendered here -->
     </div>
-
+    
     <script>
         // ============================================
-        // 当前页面的 ID（由 build 脚本用具体的 id 替换）
-        // 例如：addition / rounding / fractions ...
+        // CURRENT PAGE ID (replaced by build script)
         // ============================================
         const CURRENT_ID = "subtraction";
 
@@ -408,135 +368,136 @@
                 counts: [10, 20, 30]
             }
         };
-
+        
         // ============================================
         // STATE
         // ============================================
         let currentQuestions = [];
         let answersVisible = false;
         let currentWorksheetId = null;
-
+        
         // ============================================
         // UTILITY FUNCTIONS
         // ============================================
         function randomInt(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
         }
-
+        
         // ============================================
         // WORKSHEET GENERATION LOGIC
         // ============================================
         function generateQuestion(operator, maxRange) {
             let a, b, answer;
-
-            switch (operator) {
+            
+            switch(operator) {
                 case '+':
                     a = randomInt(1, maxRange);
                     b = randomInt(1, maxRange);
                     answer = a + b;
                     break;
-
+                    
                 case '-':
                     a = randomInt(2, maxRange);
                     b = randomInt(1, a);
                     answer = a - b;
                     break;
-
+                    
                 case '*':
                     a = randomInt(1, Math.min(12, maxRange));
                     b = randomInt(1, Math.min(12, maxRange));
                     answer = a * b;
                     break;
-
+                    
                 case '/':
                     b = randomInt(2, Math.min(12, maxRange));
                     const quotient = randomInt(1, Math.floor(maxRange / b));
                     a = b * quotient;
                     answer = quotient;
                     break;
-
+                    
                 default:
                     const operators = ['+', '-', '*', '/'];
                     const op = operators[randomInt(0, operators.length - 1)];
                     return generateQuestion(op, maxRange);
             }
-
+            
             return { a, b, operator, answer };
         }
-
+        
         function generateQuestions() {
             const config = worksheetConfig[currentWorksheetId];
             if (!config) return;
-
-            const maxRange = parseInt(document.getElementById('range').value, 10);
-            const count = parseInt(document.getElementById('count').value, 10);
-
+            
+            const topic = config.type;
+            const maxRange = parseInt(document.getElementById('range').value);
+            const count = parseInt(document.getElementById('count').value);
+            
             const questions = [];
             let operator;
-
-            if (config.type === 'addition') operator = '+';
-            else if (config.type === 'subtraction') operator = '-';
-            else if (config.type === 'multiplication') operator = '*';
-            else if (config.type === 'division') operator = '/';
+            
+            if (topic === 'addition') operator = '+';
+            else if (topic === 'subtraction') operator = '-';
+            else if (topic === 'multiplication') operator = '*';
+            else if (topic === 'division') operator = '/';
             else operator = 'mixed';
-
+            
             for (let i = 0; i < count; i++) {
                 questions.push(generateQuestion(operator, maxRange));
             }
-
+            
             currentQuestions = questions;
             renderWorksheetContent();
         }
-
+        
         function renderWorksheetContent() {
             const studentContainer = document.getElementById('student-problems');
             const answerContainer = document.getElementById('answer-problems');
-
+            
             if (!studentContainer || !answerContainer) return;
-
+            
             studentContainer.innerHTML = '';
             answerContainer.innerHTML = '';
-
+            
             const operatorSymbols = {
                 '+': '+',
                 '-': '−',
                 '*': '×',
                 '/': '÷'
             };
-
+            
             currentQuestions.forEach((q, index) => {
                 const problemDiv = document.createElement('div');
                 problemDiv.className = 'problem';
-
+                
                 const problemNumber = document.createElement('span');
                 problemNumber.className = 'problem-number';
                 problemNumber.textContent = `${index + 1}.`;
-
+                
                 const problemText = document.createElement('span');
                 problemText.innerHTML = `${q.a} ${operatorSymbols[q.operator] || q.operator} ${q.b} = <span class="answer-blank"></span>`;
-
+                
                 problemDiv.appendChild(problemNumber);
                 problemDiv.appendChild(problemText);
                 studentContainer.appendChild(problemDiv);
             });
-
+            
             currentQuestions.forEach((q, index) => {
                 const problemDiv = document.createElement('div');
                 problemDiv.className = 'problem';
-
+                
                 const problemNumber = document.createElement('span');
                 problemNumber.className = 'problem-number';
                 problemNumber.textContent = `${index + 1}.`;
-
+                
                 const problemText = document.createElement('span');
                 problemText.innerHTML = `${q.a} ${operatorSymbols[q.operator] || q.operator} ${q.b} = <span class="answer-value">${q.answer}</span>`;
-
+                
                 problemDiv.appendChild(problemNumber);
                 problemDiv.appendChild(problemText);
                 answerContainer.appendChild(problemDiv);
             });
         }
-
+        
         // ============================================
         // ANSWER TOGGLE
         // ============================================
@@ -545,10 +506,10 @@
             const answerKey = document.getElementById('answer-key');
             const btn = document.getElementById('toggle-answers-btn');
             if (!answerKey || !btn) return;
-
+            
             const icon = btn.querySelector('i');
             const span = btn.querySelector('span');
-
+            
             if (answersVisible) {
                 answerKey.classList.add('show-answers');
                 icon.classList.remove('fa-eye');
@@ -561,16 +522,16 @@
                 if (span) span.textContent = 'Show/Hide Answers';
             }
         }
-
+        
         // ============================================
         // WORKSHEET PAGE RENDERER
         // ============================================
         function renderWorksheet(id) {
             const config = worksheetConfig[id];
             if (!config) return;
-
+            
             currentWorksheetId = id;
-
+            
             const container = document.getElementById('app-container');
             container.innerHTML = `
                 <div class="relative">
@@ -579,7 +540,7 @@
                         <span>Back to Home</span>
                     </a>
                 </div>
-
+                
                 <div class="flex flex-col md:flex-row gap-6 mt-4">
                     <!-- Sidebar (Control Panel) -->
                     <aside class="no-print w-full md:w-80 flex-shrink-0">
@@ -588,63 +549,53 @@
                             <h1 class="text-3xl font-bold text-center mb-6">
                                 ${config.icon} ${config.title}
                             </h1>
-
+                            
                             <!-- Number Range -->
                             <div>
                                 <label class="block text-sm font-semibold mb-2">Number Range</label>
                                 <select id="range" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                     ${config.ranges.map(r => {
-                                        const label =
-                                            r === 5 ? '1–5' :
-                                            r === 9 ? '1–9' :
-                                            r === 10 ? '1–10' :
-                                            r === 12 ? '1–12' :
-                                            r === 20 ? '1–20' :
-                                            r === 50 ? '1–50' :
-                                            r === 100 ? '1–100' :
-                                            r === 999 ? '10–999' :
-                                            r === 9999 ? '100–9999' :
-                                            `1–${r}`;
+                                        const label = r === 5 ? '1–5' : r === 9 ? '1–9' : r === 10 ? '1–10' : r === 12 ? '1–12' : r === 20 ? '1–20' : r === 50 ? '1–50' : r === 100 ? '1–100' : r === 999 ? '10–999' : r === 9999 ? '100–9999' : `1–${r}`;
                                         return `<option value="${r}" ${r === config.defaultRange ? 'selected' : ''}>${label}</option>`;
                                     }).join('')}
                                 </select>
                             </div>
-
+                            
                             <!-- Question Count -->
                             <div>
                                 <label class="block text-sm font-semibold mb-2">Question Count</label>
                                 <select id="count" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                    ${config.counts.map(c =>
+                                    ${config.counts.map(c => 
                                         `<option value="${c}" ${c === config.defaultCount ? 'selected' : ''}>${c}</option>`
                                     ).join('')}
                                 </select>
                             </div>
-
+                            
                             <!-- Buttons -->
                             <div class="space-y-3">
                                 <button id="generate-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
                                     <i class="fas fa-magic"></i>
                                     <span>Generate Worksheet</span>
                                 </button>
-
+                                
                                 <button id="print-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
                                     <i class="fas fa-print"></i>
                                     <span>Print / Save PDF</span>
                                 </button>
-
+                                
                                 <button id="toggle-answers-btn" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2">
                                     <i class="fas fa-eye"></i>
                                     <span>Show/Hide Answers</span>
                                 </button>
                             </div>
-
+                            
                             <!-- Ad Box -->
                             <div class="bg-gray-200 rounded-lg flex items-center justify-center" style="width: 300px; height: 250px; margin: 0 auto;">
                                 <span class="text-gray-500 font-semibold">Ad Space</span>
                             </div>
                         </div>
                     </aside>
-
+                    
                     <!-- Worksheet Area -->
                     <main class="flex-1">
                         <div id="worksheet-container" class="space-y-6">
@@ -668,12 +619,12 @@
                                         </div>
                                     </div>
                                 </div>
-
+                                
                                 <div class="problem-grid" id="student-problems">
                                     <!-- Problems will be generated here -->
                                 </div>
                             </div>
-
+                            
                             <!-- Answer Key (Page 2) -->
                             <div id="answer-key" class="worksheet-page page">
                                 <h2 class="text-2xl font-bold mb-6 text-center">Answer Key</h2>
@@ -682,7 +633,7 @@
                                 </div>
                             </div>
                         </div>
-
+                        
                         <!-- Footer -->
                         <footer class="no-print text-center mt-8 text-gray-600 text-sm">
                             Generated for free at EasyMathPrint.com — © <span id="year"></span>
@@ -690,35 +641,32 @@
                     </main>
                 </div>
             `;
-
+            
+            // Set year
             const yearEl = document.getElementById('year');
             if (yearEl) {
                 yearEl.textContent = new Date().getFullYear();
             }
-
+            
+            // Attach event listeners
             document.getElementById('generate-btn').addEventListener('click', generateQuestions);
             document.getElementById('print-btn').addEventListener('click', () => window.print());
             document.getElementById('toggle-answers-btn').addEventListener('click', toggleAnswers);
-
+            
+            // Generate initial worksheet
             generateQuestions();
         }
-
+        
         // ============================================
-        // MAIN
+        // INITIALIZATION
         // ============================================
         function init() {
-            // 替换后的页面里，CURRENT_ID 会是具体的 id
-            const id = CURRENT_ID && CURRENT_ID !== "subtraction" ? CURRENT_ID : null;
-
-            if (id && worksheetConfig[id]) {
-                renderWorksheet(id);
-            } else {
-                // 理论上不会走到这里（模板专门给子页面用）
-                // 如果真走到了，就随便渲染一个 addition，避免空白页
-                renderWorksheet("addition");
+            // Use CURRENT_ID to render the worksheet
+            if (CURRENT_ID && worksheetConfig[CURRENT_ID]) {
+                renderWorksheet(CURRENT_ID);
             }
         }
-
+        
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
