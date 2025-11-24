@@ -65,7 +65,7 @@ module.exports = {
             defaultCount: 20,
             ranges: [20],
             counts: [10, 20, 30],
-            releaseDate: "2025-11-25",
+            releaseDate: "2025-11-24",
             workbook: false
         },
         "addition-double-digit-no-regroup": {
@@ -77,7 +77,7 @@ module.exports = {
             defaultCount: 20,
             ranges: [50],
             counts: [15, 20, 25],
-            releaseDate: "2025-11-26"
+            releaseDate: "2025-11-24"
         },
         "addition-single-digit-vertical": {
             slug: "addition-single-digit-vertical",
@@ -88,7 +88,7 @@ module.exports = {
             defaultCount: 20,
             ranges: [10],
             counts: [15, 20, 25],
-            releaseDate: "2025-11-27"
+            releaseDate: "2025-11-24"
         },
         "addition-missing-addends": {
             slug: "addition-missing-addends",
@@ -99,7 +99,7 @@ module.exports = {
             defaultCount: 20,
             ranges: [20],
             counts: [15, 20, 25],
-            releaseDate: "2025-11-28"
+            releaseDate: "2025-11-24"
         },
         "addition-three-numbers": {
             slug: "addition-three-numbers",
@@ -110,7 +110,7 @@ module.exports = {
             defaultCount: 15,
             ranges: [10],
             counts: [10, 15, 20],
-            releaseDate: "2025-11-29"
+            releaseDate: "2025-11-24"
         },
         "addition-word-problems": {
             slug: "addition-word-problems",
@@ -121,7 +121,7 @@ module.exports = {
             defaultCount: 10,
             ranges: [20],
             counts: [8, 10, 12],
-            releaseDate: "2025-11-30"
+            releaseDate: "2025-11-24"
         },
         "addition-doubles-facts": {
             slug: "addition-doubles-facts",
@@ -132,7 +132,7 @@ module.exports = {
             defaultCount: 20,
             ranges: [10],
             counts: [15, 20, 25],
-            releaseDate: "2025-12-01"
+            releaseDate: "2025-11-24"
         },
         "addition-near-doubles": {
             slug: "addition-near-doubles",
@@ -143,7 +143,7 @@ module.exports = {
             defaultCount: 20,
             ranges: [10],
             counts: [15, 20, 25],
-            releaseDate: "2025-12-02"
+            releaseDate: "2025-11-24"
         },
         "addition-making-ten": {
             slug: "addition-making-ten",
@@ -154,7 +154,7 @@ module.exports = {
             defaultCount: 20,
             ranges: [10],
             counts: [15, 20, 25],
-            releaseDate: "2025-12-03"
+            releaseDate: "2025-11-24"
         },
         "addition-timed-drill": {
             slug: "addition-timed-drill",
