@@ -38,6 +38,101 @@ console.log(`🌐 Site URL: ${DOMAIN}`);
 console.log(`📊 Analytics: ${siteConfig.enable_analytics ? 'Enabled' : 'Disabled'}\n`);
 
 // ====================================================================
+// 智能图标生成系统（根据slug自动生成主题图标）
+// ====================================================================
+function getIconForSlug(slug) {
+    // 根据slug关键词自动匹配图标，保持简洁、教育风格统一
+    const slugLower = slug.toLowerCase();
+    
+    // Addition 主题图标
+    if (slugLower.includes('sums-within-10') || slugLower.includes('within-10')) return '🔟';
+    if (slugLower.includes('sums-within-20') || slugLower.includes('within-20')) return '2️⃣0️⃣';
+    if (slugLower.includes('double-digit')) return '🔢';
+    if (slugLower.includes('single-digit') || slugLower.includes('vertical')) return '📊';
+    if (slugLower.includes('missing-addends') || slugLower.includes('missing')) return '❓';
+    if (slugLower.includes('three-numbers') || slugLower.includes('three')) return '3️⃣';
+    if (slugLower.includes('word-problems') || slugLower.includes('word')) return '📝';
+    if (slugLower.includes('doubles-facts') || slugLower.includes('doubles')) return '⚡';
+    if (slugLower.includes('near-doubles') || slugLower.includes('near')) return '⚡';
+    if (slugLower.includes('making-ten') || slugLower.includes('ten')) return '🔟';
+    if (slugLower.includes('timed-drill') || slugLower.includes('timed')) return '⏱️';
+    if (slugLower.includes('horizontal')) return '➡️';
+    if (slugLower.includes('number-lines') || slugLower.includes('number-line')) return '📏';
+    if (slugLower.includes('picture') || slugLower.includes('visual')) return '🖼️';
+    if (slugLower.includes('mixed-practice') || slugLower.includes('mixed')) return '🔀';
+    if (slugLower.includes('addition')) return '➕';
+    
+    // Subtraction 主题图标
+    if (slugLower.includes('within-10') && slugLower.includes('subtract')) return '🔟';
+    if (slugLower.includes('within-20') && slugLower.includes('subtract')) return '2️⃣0️⃣';
+    if (slugLower.includes('fact-families') || slugLower.includes('families')) return '👨‍👩‍👧‍👦';
+    if (slugLower.includes('comparing-differences') || slugLower.includes('comparing')) return '⚖️';
+    if (slugLower.includes('within-100')) return '💯';
+    if (slugLower.includes('two-digit')) return '🔢';
+    if (slugLower.includes('subtraction')) return '➖';
+    
+    // Multiplication 主题图标
+    if (slugLower.includes('times-2') || slugLower.includes('2x')) return '✖️2️⃣';
+    if (slugLower.includes('times-3') || slugLower.includes('3x')) return '✖️3️⃣';
+    if (slugLower.includes('times-4') || slugLower.includes('4x')) return '✖️4️⃣';
+    if (slugLower.includes('times-5') || slugLower.includes('5x')) return '✖️5️⃣';
+    if (slugLower.includes('times-6') || slugLower.includes('6x')) return '✖️6️⃣';
+    if (slugLower.includes('times-7') || slugLower.includes('7x')) return '✖️7️⃣';
+    if (slugLower.includes('times-8') || slugLower.includes('8x')) return '✖️8️⃣';
+    if (slugLower.includes('times-9') || slugLower.includes('9x')) return '✖️9️⃣';
+    if (slugLower.includes('times-10') || slugLower.includes('10x')) return '✖️🔟';
+    if (slugLower.includes('multiplication')) return '✖️';
+    
+    // Division 主题图标
+    if (slugLower.includes('by-2') || slugLower.includes('divide-2')) return '➗2️⃣';
+    if (slugLower.includes('by-3') || slugLower.includes('divide-3')) return '➗3️⃣';
+    if (slugLower.includes('by-4') || slugLower.includes('divide-4')) return '➗4️⃣';
+    if (slugLower.includes('by-5') || slugLower.includes('divide-5')) return '➗5️⃣';
+    if (slugLower.includes('by-6') || slugLower.includes('divide-6')) return '➗6️⃣';
+    if (slugLower.includes('by-7') || slugLower.includes('divide-7')) return '➗7️⃣';
+    if (slugLower.includes('by-8') || slugLower.includes('divide-8')) return '➗8️⃣';
+    if (slugLower.includes('by-9') || slugLower.includes('divide-9')) return '➗9️⃣';
+    if (slugLower.includes('by-10') || slugLower.includes('divide-10')) return '➗🔟';
+    if (slugLower.includes('remainders')) return '🔢';
+    if (slugLower.includes('division')) return '➗';
+    
+    // Fractions 主题图标
+    if (slugLower.includes('like-denominators') || slugLower.includes('denominators')) return '🔢';
+    if (slugLower.includes('equivalent')) return '🔄';
+    if (slugLower.includes('comparing') && slugLower.includes('fraction')) return '⚖️';
+    if (slugLower.includes('simplifying')) return '✨';
+    if (slugLower.includes('visual')) return '👁️';
+    if (slugLower.includes('mixed-numbers')) return '🔀';
+    if (slugLower.includes('adding') && slugLower.includes('fraction')) return '➕';
+    if (slugLower.includes('subtracting') && slugLower.includes('fraction')) return '➖';
+    if (slugLower.includes('number-line') && slugLower.includes('fraction')) return '📏';
+    if (slugLower.includes('parts-whole') || slugLower.includes('parts')) return '🧩';
+    if (slugLower.includes('ordering')) return '🔢';
+    if (slugLower.includes('unit-fractions')) return '1️⃣';
+    if (slugLower.includes('decimal-conversion')) return '🔄';
+    if (slugLower.includes('fractions')) return '🔢';
+    
+    // Mixed Operations 主题图标
+    if (slugLower.includes('speed-drill')) return '⚡';
+    if (slugLower.includes('order-operations') || slugLower.includes('order')) return '🔢';
+    if (slugLower.includes('advanced')) return '🎯';
+    if (slugLower.includes('timed-practice')) return '⏱️';
+    if (slugLower.includes('challenge')) return '🏆';
+    if (slugLower.includes('review')) return '📚';
+    if (slugLower.includes('multi-step')) return '🔄';
+    if (slugLower.includes('daily-practice')) return '📅';
+    if (slugLower.includes('problem-solving')) return '🧩';
+    if (slugLower.includes('mental-math')) return '🧠';
+    if (slugLower.includes('estimation')) return '📊';
+    if (slugLower.includes('patterns')) return '🔀';
+    if (slugLower.includes('mastery')) return '⭐';
+    if (slugLower.includes('mixed-operations')) return '🔀';
+    
+    // 默认图标（根据type）
+    return '📝';
+}
+
+// ====================================================================
 // PART 1-4: 生成所有工作表页面（多语言支持）
 // ====================================================================
 Object.entries(worksheetConfig).forEach(([key, item]) => {
@@ -64,6 +159,9 @@ Object.entries(worksheetConfig).forEach(([key, item]) => {
         if (!title || !description) {
             return;
         }
+        
+        // 根据slug自动生成主题图标
+        const pageIcon = getIconForSlug(slug);
         
         let folderPath;
         let canonicalUrl;
@@ -221,6 +319,7 @@ Object.entries(worksheetConfig).forEach(([key, item]) => {
             .replace(/{{description}}/g, description) // 兼容旧占位符
             .replace(/{{slug}}/g, slug)
             .replace(/{{lang}}/g, lang) // 渲染语言变量
+            .replace(/{{pageIcon}}/g, pageIcon) // 页面图标
             .replace(/{{ogImage}}/g, ogImage)
             .replace(/{{canonical}}/g, canonicalUrl)
             .replace(/{{signature_meta_script}}/g, signatureMetaScript)
@@ -353,14 +452,8 @@ const publishedPages = Object.entries(worksheetConfig)
         const lang = "en"; // 首页暂时只显示英文
         const slug = item.slug || key;
         const href = `/${slug}/`;
-        const iconMap = {
-            addition: "➕",
-            subtraction: "➖",
-            multiplication: "✖️",
-            division: "➗",
-            fractions: "🔢",
-            mixed: "🔀"
-        };
+        // 根据slug自动生成主题图标（使用智能图标生成系统）
+        const pageIcon = getIconForSlug(slug);
         // 获取英文标题（兼容多语言结构）
         const getTitle = (item) => {
             if (typeof item.title === 'string') return item.title;
@@ -380,7 +473,7 @@ const publishedPages = Object.entries(worksheetConfig)
             lang,
             slug,
             href,
-            icon: iconMap[item.type] || "📝",
+            icon: pageIcon, // 使用智能生成的图标
             releaseDate: item.releaseDate || "9999-12-31" // 没有日期的排最后
         };
     })
