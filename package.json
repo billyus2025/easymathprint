@@ -1,7 +1,7 @@
 {
   "name": "easymathprint-ssg",
   "version": "1.0.0",
-  "description": "Static Site Generator for EasyMathPrint.com",
+  "description": "Static Site Generator for EasyMathPrint.com - 母工厂标准版",
   "main": "build.js",
   "scripts": {
     "build": "node build.js",
@@ -13,7 +13,10 @@
     "static-site-generator"
   ],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "puppeteer": "^21.0.0"
+  }
 }
 
 
