@@ -10,6 +10,9 @@ const DIST_DIR = path.join(__dirname, "dist");
 const PDF_DIR = path.join(DIST_DIR, "pdf");
 const today = new Date().toISOString().slice(0, 10);
 
+// 多语言支持：当前启用的语言列表（暂时只启用英文，不生成 cn / es 目录）
+const languages = ["en"]; // 未来可扩展为 ["en", "cn", "es"]
+
 // 确保目录存在
 if (!fs.existsSync(DIST_DIR)) {
     fs.mkdirSync(DIST_DIR, { recursive: true });
@@ -35,44 +38,78 @@ console.log(`🌐 Site URL: ${DOMAIN}`);
 console.log(`📊 Analytics: ${siteConfig.enable_analytics ? 'Enabled' : 'Disabled'}\n`);
 
 // ====================================================================
-// PART 1-4: 生成所有工作表页面
+// PART 1-4: 生成所有工作表页面（多语言支持）
 // ====================================================================
 Object.entries(worksheetConfig).forEach(([key, item]) => {
-    const lang = item.lang || "en";
+    const itemLang = item.lang || "en";
     const slug = item.slug || key;
     
-    let folderPath;
-    let canonicalUrl;
-    
-    if (lang === "en") {
-        folderPath = path.join(DIST_DIR, slug);
-        canonicalUrl = `${DOMAIN}/${slug}/`;
-    } else {
-        folderPath = path.join(DIST_DIR, lang, slug);
-        canonicalUrl = `${DOMAIN}/${lang}/${slug}/`;
-    }
+    // 只为启用的语言生成页面
+    languages.forEach(lang => {
+        // 获取多语言内容（兼容旧格式）
+        const getTitle = (item, lang) => {
+            if (typeof item.title === 'string') return item.title; // 兼容旧格式
+            return item.title && item.title[lang] ? item.title[lang] : (item.title && item.title.en ? item.title.en : '');
+        };
+        
+        const getDescription = (item, lang) => {
+            if (typeof item.description === 'string') return item.description; // 兼容旧格式
+            return item.description && item.description[lang] ? item.description[lang] : (item.description && item.description.en ? item.description.en : '');
+        };
+        
+        const title = getTitle(item, lang);
+        const description = getDescription(item, lang);
+        
+        // 如果当前语言没有内容，跳过（未来扩展时使用）
+        if (!title || !description) {
+            return;
+        }
+        
+        let folderPath;
+        let canonicalUrl;
+        
+        // 路径规则：en 在根目录，其他语言在子目录
+        // 现阶段 lang 固定为 "en"，保持现有英文目录结构不变
+        if (lang === "en") {
+            folderPath = path.join(DIST_DIR, slug);
+            canonicalUrl = `${DOMAIN}/${slug}/`;
+        } else if (lang === "cn") {
+            // 预留未来中文路径逻辑（暂不启用）
+            folderPath = path.join(DIST_DIR, "cn", slug);
+            canonicalUrl = `${DOMAIN}/cn/${slug}/`;
+        } else if (lang === "es") {
+            // 预留未来西班牙语路径逻辑（暂不启用）
+            folderPath = path.join(DIST_DIR, "es", slug);
+            canonicalUrl = `${DOMAIN}/es/${slug}/`;
+        } else {
+            // 其他语言默认在子目录
+            folderPath = path.join(DIST_DIR, lang, slug);
+            canonicalUrl = `${DOMAIN}/${lang}/${slug}/`;
+        }
 
-    const shouldPublish = !item.releaseDate || item.releaseDate <= today;
+        const shouldPublish = !item.releaseDate || item.releaseDate <= today;
 
-    if (!shouldPublish) {
-        console.log(`⏳ Scheduled for future: ${slug} (release on ${item.releaseDate})`);
-        scheduledCount++;
-        return;
-    }
+        if (!shouldPublish) {
+            if (lang === "en") { // 只在英文时打印，避免重复
+                console.log(`⏳ Scheduled for future: ${slug} (release on ${item.releaseDate})`);
+            }
+            scheduledCount++;
+            return;
+        }
 
-    if (!fs.existsSync(folderPath)) {
-        fs.mkdirSync(folderPath, { recursive: true });
-    }
+        if (!fs.existsSync(folderPath)) {
+            fs.mkdirSync(folderPath, { recursive: true });
+        }
 
-    // PART 2: 自动生成OG图URL（占位符方案）
-    const ogImage = siteConfig.enable_social_assets 
-        ? (item.ogImage || `https://via.placeholder.com/1200x630.png?text=${encodeURIComponent(item.title)}`)
-        : (item.ogImage || "https://www.easymathprint.com/assets/og-default.png");
-    
-    // 生成GA4脚本（如果启用）
-    let gaScript = '';
-    if (siteConfig.enable_analytics && siteConfig.analytics_id && siteConfig.analytics_id !== "G-XXXXXXXXXX") {
-        gaScript = `
+        // PART 2: 自动生成OG图URL（占位符方案）
+        const ogImage = siteConfig.enable_social_assets 
+            ? (item.ogImage || `https://via.placeholder.com/1200x630.png?text=${encodeURIComponent(title)}`)
+            : (item.ogImage || "https://www.easymathprint.com/assets/og-default.png");
+        
+        // 生成GA4脚本（如果启用）
+        let gaScript = '';
+        if (siteConfig.enable_analytics && siteConfig.analytics_id && siteConfig.analytics_id !== "G-XXXXXXXXXX") {
+            gaScript = `
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=${siteConfig.analytics_id}"></script>
     <script>
@@ -81,50 +118,162 @@ Object.entries(worksheetConfig).forEach(([key, item]) => {
       gtag('js', new Date());
       gtag('config', '${siteConfig.analytics_id}');
     </script>`;
-    }
+        }
 
-    // 注入所有占位符
-    let finalHTML = templateHTML
-        .replace(/{{title}}/g, item.title)
-        .replace(/{{description}}/g, item.description)
-        .replace(/{{slug}}/g, slug)
-        .replace(/{{lang}}/g, lang)
-        .replace(/{{ogImage}}/g, ogImage)
-        .replace(/{{canonical}}/g, canonicalUrl)
-        .replace(/{{ga_script}}/g, gaScript)
-        .replace(/{{worksheetConfig}}/g, JSON.stringify(worksheetConfig, null, 4));
+        // ====================================================================
+        // 全局安全能力注入：版权签名、指纹、Referrer检测
+        // ====================================================================
+        const crypto = require("crypto");
+        const buildTimestamp = new Date().toISOString();
+        const buildId = crypto.createHash('md5')
+            .update(`${siteConfig.siteId}:${buildTimestamp}`)
+            .digest('hex')
+            .substring(0, 8); // 8位构建ID
+        
+        // 1. 版权 & 数字签名系统
+        // 签名包含：slug、build time、siteId、siteGroup
+        const pageSignature = crypto.createHash('sha256')
+            .update(`${slug}:${buildTimestamp}:${siteConfig.siteId}:${siteConfig.siteGroup}`)
+            .digest('hex')
+            .substring(0, 12); // 12位短版签名hash
+        
+        const signatureMeta = {
+            slug: slug,
+            buildTime: buildTimestamp,
+            siteId: siteConfig.siteId,
+            siteGroup: siteConfig.siteGroup,
+            signature: pageSignature
+        };
+        
+        // 2. 站群追踪指纹（Site Fingerprinting）
+        // 注入到 window.SITE_META 中
+        const siteFingerprint = {
+            siteId: siteConfig.siteId,
+            siteGroup: siteConfig.siteGroup,
+            buildId: buildId,
+            buildTime: buildTimestamp
+        };
+        
+        // 3. 防盗链（Referrer Check）脚本
+        let securityScript = '';
+        if (siteConfig.enableReferrerCheck) {
+            const allowedReferrers = siteConfig.allowedReferrers || [];
+            securityScript += `
+    <!-- Referrer Check (防盗链) -->
+    <script>
+        (function() {
+            const allowedReferrers = ${JSON.stringify(allowedReferrers)};
+            const currentReferrer = document.referrer || '';
+            const currentOrigin = window.location.origin;
+            const isDirectAccess = currentReferrer === '';
+            
+            // 检查是否在白名单中
+            const isAllowed = allowedReferrers.some(ref => {
+                if (ref === '') return isDirectAccess;
+                return currentReferrer.startsWith(ref) || currentOrigin.startsWith(ref);
+            });
+            
+            // 非白名单来源访问时显示"Access Denied"
+            if (!isAllowed && currentReferrer !== '') {
+                document.body.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:Arial,sans-serif;background:#f5f5f5;"><div style="text-align:center;padding:2rem;background:white;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);"><h1 style="color:#dc2626;margin:0 0 1rem 0;">Access Denied</h1><p style="color:#666;margin:0;">This content is protected by referrer check.</p></div></div>';
+            }
+        })();
+    </script>`;
+        }
+        
+        // 站群追踪指纹注入
+        if (siteConfig.enableSiteFingerprint) {
+            securityScript += `
+    <!-- Site Fingerprinting (站群追踪指纹) -->
+    <script>
+        window.SITE_META = ${JSON.stringify(siteFingerprint)};
+    </script>`;
+        }
+        
+        // 版权签名数据（用于页面显示和meta标签）
+        const copyrightSignature = siteConfig.enableSecuritySignature ? {
+            siteId: siteConfig.siteId,
+            siteGroup: siteConfig.siteGroup,
+            buildTime: buildTimestamp,
+            signature: pageSignature,
+            owner: siteConfig.siteOwner,
+            slug: slug
+        } : null;
+        
+        // 生成签名 Meta 标签脚本
+        let signatureMetaScript = '';
+        if (siteConfig.enableSecuritySignature) {
+            signatureMetaScript = `
+    <!-- Copyright & Digital Signature Meta Tags -->
+    <meta name="site-signature" content="${pageSignature}">
+    <meta name="site-id" content="${siteConfig.siteId}">
+    <meta name="site-group" content="${siteConfig.siteGroup}">
+    <meta name="build-time" content="${buildTimestamp}">
+    <meta name="page-slug" content="${slug}">`;
+        }
 
-    fs.writeFileSync(
-        path.join(folderPath, "index.html"),
-        finalHTML,
-        "utf8"
-    );
+        // 注入所有占位符（使用多语言内容）
+        // 所有模板渲染时增加 { lang }，现阶段 lang 固定为 "en"
+        let finalHTML = templateHTML
+            .replace(/{{title\[lang\]}}/g, title)
+            .replace(/{{title}}/g, title) // 兼容旧占位符
+            .replace(/{{description\[lang\]}}/g, description)
+            .replace(/{{description}}/g, description) // 兼容旧占位符
+            .replace(/{{slug}}/g, slug)
+            .replace(/{{lang}}/g, lang) // 渲染语言变量
+            .replace(/{{ogImage}}/g, ogImage)
+            .replace(/{{canonical}}/g, canonicalUrl)
+            .replace(/{{signature_meta_script}}/g, signatureMetaScript)
+            .replace(/{{ga_script}}/g, gaScript)
+            .replace(/{{security_script}}/g, securityScript)
+            .replace(/{{copyright_signature}}/g, copyrightSignature ? JSON.stringify(copyrightSignature) : 'null')
+            .replace(/{{worksheetConfig}}/g, JSON.stringify(worksheetConfig, null, 4));
 
-    allUrls.push({
-        loc: canonicalUrl,
-        lastmod: today
-    });
-    publishedSlugs.push({ slug, folderPath, canonicalUrl, lang });
-    publishedCount++;
-    console.log(`✅ Generated: ${lang === "en" ? "" : lang + "/"}${slug}/index.html`);
+        fs.writeFileSync(
+            path.join(folderPath, "index.html"),
+            finalHTML,
+            "utf8"
+        );
 
-    // PART 2: 生成 social-post.txt
-    if (siteConfig.enable_social_assets) {
-        const socialPostContent = `${item.title}
+        allUrls.push({
+            loc: canonicalUrl,
+            lastmod: today
+        });
+        publishedSlugs.push({ slug, folderPath, canonicalUrl, lang });
+        publishedCount++;
+        console.log(`✅ Generated: ${lang === "en" ? "" : lang + "/"}${slug}/index.html`);
 
-${item.description}
+        // PART 2: 生成 social-post.txt
+        if (siteConfig.enable_social_assets) {
+            const socialPostContent = `${title}
+
+${description}
 
 ${canonicalUrl}
 
 #math #worksheet #homeschool #education #printable #${item.type} #grade1 #freemath`;
-        
-        fs.writeFileSync(
-            path.join(folderPath, "social-post.txt"),
-            socialPostContent,
-            "utf8"
-        );
-    }
+            
+            fs.writeFileSync(
+                path.join(folderPath, "social-post.txt"),
+                socialPostContent,
+                "utf8"
+            );
+        }
+    });
 });
+
+// ====================================================================
+// 未来语言扩展接口预埋（不启用）
+// ====================================================================
+// Future multilingual build:
+// languages.forEach(lang => {
+//   generatePageForLanguage(lang);
+// });
+
+function generatePageForLanguage(lang, item) {
+    // reserved for future multilingual build
+    // 当需要启用多语言时，此函数将处理特定语言的页面生成逻辑
+}
 
 // ====================================================================
 // PART 1: PDF工厂（Puppeteer自动生成PDF）
@@ -192,13 +341,18 @@ async function generatePDFs() {
 // ====================================================================
 console.log("\n📄 Generating homepage with pagination...");
 
-// 收集所有已发布的页面，按 releaseDate 倒序排序
+// 收集所有已发布的页面，按 releaseDate 倒序排序（仅英文，首页暂时只显示英文）
 const publishedPages = Object.entries(worksheetConfig)
-    .filter(([key, item]) => !item.releaseDate || item.releaseDate <= today)
+    .filter(([key, item]) => {
+        const shouldPublish = !item.releaseDate || item.releaseDate <= today;
+        // 只收集英文内容（未来可扩展为多语言首页）
+        const hasEnglishContent = typeof item.title === 'string' || (item.title && item.title.en);
+        return shouldPublish && hasEnglishContent;
+    })
     .map(([key, item]) => {
-        const lang = item.lang || "en";
+        const lang = "en"; // 首页暂时只显示英文
         const slug = item.slug || key;
-        const href = lang === "en" ? `/${slug}/` : `/${lang}/${slug}/`;
+        const href = `/${slug}/`;
         const iconMap = {
             addition: "➕",
             subtraction: "➖",
@@ -207,9 +361,22 @@ const publishedPages = Object.entries(worksheetConfig)
             fractions: "🔢",
             mixed: "🔀"
         };
+        // 获取英文标题（兼容多语言结构）
+        const getTitle = (item) => {
+            if (typeof item.title === 'string') return item.title;
+            return item.title && item.title.en ? item.title.en : '';
+        };
+        const getDescription = (item) => {
+            if (typeof item.description === 'string') return item.description;
+            return item.description && item.description.en ? item.description.en : '';
+        };
         return {
             key,
-            item,
+            item: {
+                ...item,
+                title: getTitle(item),
+                description: getDescription(item)
+            },
             lang,
             slug,
             href,

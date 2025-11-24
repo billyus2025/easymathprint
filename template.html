@@ -5,22 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <link rel="shortcut icon" href="/favicon.svg">
-    <title>{{title}} | EasyMathPrint</title>
-    <meta name="description" content="{{description}}">
+    <title>{{title[lang]}} | EasyMathPrint</title>
+    <meta name="description" content="{{description[lang]}}">
     <link rel="canonical" href="{{canonical}}">
+    
+    <!-- 版权 & 数字签名 Meta 标签 - 由build.js自动注入 -->
+    {{signature_meta_script}}
     
     <!-- Google Analytics (GA4) - 由build.js自动注入 -->
     {{ga_script}}
     
+    <!-- Security Scripts (安全脚本) - 由build.js自动注入 -->
+    {{security_script}}
+    
     <!-- Open Graph / Social Media Meta Tags -->
-    <meta property="og:title" content="{{title}} | EasyMathPrint">
-    <meta property="og:description" content="{{description}}">
+    <meta property="og:title" content="{{title[lang]}} | EasyMathPrint">
+    <meta property="og:description" content="{{description[lang]}}">
     <meta property="og:image" content="{{ogImage}}">
     <meta property="og:url" content="{{canonical}}">
     <meta property="og:type" content="website">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{title}} | EasyMathPrint">
-    <meta name="twitter:description" content="{{description}}">
+    <meta name="twitter:title" content="{{title[lang]}} | EasyMathPrint">
+    <meta name="twitter:description" content="{{description[lang]}}">
     <meta name="twitter:image" content="{{ogImage}}">
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -70,7 +76,11 @@
                         <div class="text-xs text-gray-500">Free printable math worksheets</div>
                     </div>
                 </div>
-                <a href="/" class="text-blue-600 hover:text-blue-800 font-semibold">Home</a>
+                <div class="flex items-center gap-4">
+                    <!-- 语言切换占位符（暂不生效，未来扩展使用） -->
+                    <div id="lang-switch-placeholder"></div>
+                    <a href="/" class="text-blue-600 hover:text-blue-800 font-semibold">Home</a>
+                </div>
             </div>
         </div>
     </header>
@@ -83,7 +93,7 @@
         <div class="flex flex-col lg:flex-row gap-6">
             <aside class="no-print w-full lg:w-80 flex-shrink-0">
                 <div class="bg-white rounded-xl shadow-lg p-6 space-y-6 sticky top-4">
-                    <h1 class="text-2xl font-bold text-center" id="worksheet-title">{{title}}</h1>
+                    <h1 class="text-2xl font-bold text-center" id="worksheet-title">{{title[lang]}}</h1>
                     
                     <div>
                         <label class="block text-sm font-semibold mb-2">Number Range</label>
@@ -161,13 +171,16 @@
 
     <footer class="no-print bg-white shadow-sm mt-12 py-6">
         <div class="container mx-auto px-4 text-center text-gray-600 text-sm">
-            Generated for free at EasyMathPrint.com — © <span id="year"></span>
+            <div id="copyright-text">Generated for free at EasyMathPrint.com — © <span id="year"></span></div>
+            <!-- 版权签名注入：© + 年份 + 品牌名 + 签名hash(短版) -->
+            <div id="copyright-signature" class="mt-2 text-xs text-gray-400 font-mono" style="display: none;"></div>
         </div>
     </footer>
 
     <script>
         const CURRENT_ID = "{{slug}}";
         const worksheetConfig = {{worksheetConfig}};
+        const CURRENT_LANG = "{{lang}}"; // 当前页面语言，由 build.js 注入
         
         function randomInt(min, max) {
             return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -349,7 +362,9 @@
             const config = worksheetConfig[CURRENT_ID];
             if (!config) return;
             
-            document.getElementById("worksheet-title").textContent = config.title;
+            // 使用多语言标题（兼容旧格式）
+            const title = typeof config.title === 'string' ? config.title : (config.title && config.title[CURRENT_LANG] ? config.title[CURRENT_LANG] : config.title.en);
+            document.getElementById("worksheet-title").textContent = title;
             
             const rangeSelect = document.getElementById("range");
             const countSelect = document.getElementById("count");
@@ -386,7 +401,27 @@
                 workbookBtn.addEventListener("click", generateWorkbook);
             }
             
-            document.getElementById("year").textContent = new Date().getFullYear();
+            const currentYear = new Date().getFullYear();
+            document.getElementById("year").textContent = currentYear;
+            
+            // 版权 & 数字签名系统注入
+            // 格式：© + 年份 + 品牌名 + 签名hash(短版)
+            const copyrightData = {{copyright_signature}};
+            if (copyrightData) {
+                const copyrightTextEl = document.getElementById("copyright-text");
+                const signatureEl = document.getElementById("copyright-signature");
+                
+                if (copyrightTextEl) {
+                    // 更新版权文本：© + 年份 + 品牌名 + 签名hash(短版)
+                    copyrightTextEl.innerHTML = `© ${currentYear} ${copyrightData.owner} #${copyrightData.signature}`;
+                }
+                
+                if (signatureEl) {
+                    // 显示详细签名信息（可选，用于调试）
+                    signatureEl.textContent = `[${copyrightData.siteId}/${copyrightData.siteGroup}] Build: ${new Date(copyrightData.buildTime).toLocaleString()}`;
+                    signatureEl.style.display = "block";
+                }
+            }
             
             renderWorksheet();
         }

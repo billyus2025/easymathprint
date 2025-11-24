@@ -1,11 +1,32 @@
 // Site-wide configuration (母工厂标准配置)
 const siteConfig = {
+    // 基础配置
     analytics_id: "G-XXXXXXXXXX", // 预留GA4 ID，后续站点可替换
     site_url: "https://www.easymathprint.com", // 用于 canonical & sitemap
     enable_pdf_generation: false, // PDF工厂开关（暂时禁用，快速构建）
     enable_social_assets: true, // 社交媒体资产生成开关
     enable_analytics: true, // Google Analytics开关
-    enable_legal_pages: true // 法律页面生成开关
+    enable_legal_pages: true, // 法律页面生成开关
+    languages: ["en"], // 启用的语言列表，未来可扩展为 ["en", "cn", "es"]
+    
+    // 站点元信息 & 安全配置（100-Site Factory 全局安全能力）
+    siteId: "ems-001", // 站点唯一 ID（001 号工厂）
+    siteGroup: "math-print", // 站群分类
+    siteOwner: "EasyMathPrint", // 品牌名
+    defaultLang: "en",
+    
+    // 防盗链配置（Referrer Check）
+    allowedReferrers: [
+        "https://www.easymathprint.com",
+        "https://easymathprint.com",
+        "" // 允许直接访问（空字符串表示无referrer）
+    ],
+    // 未来可能的 CDN 域名可在此添加
+    
+    // 安全功能开关
+    enableSecuritySignature: true, // 版权 & 数字签名系统
+    enableReferrerCheck: true, // 防盗链（Referrer Check）
+    enableSiteFingerprint: true // 站群追踪指纹（Site Fingerprinting）
 };
 
 module.exports = {
@@ -14,8 +35,16 @@ module.exports = {
         "addition-sums-within-10": {
             lang: "en",
             slug: "addition-sums-within-10",
-            title: "Addition Sums Within 10 Worksheets - Grade 1",
-            description: "Practice addition facts with sums up to 10. Perfect for Grade 1 students building foundational math skills.",
+            title: {
+                en: "Addition Sums Within 10 Worksheets - Grade 1",
+                cn: "",
+                es: ""
+            },
+            description: {
+                en: "Practice addition facts with sums up to 10. Perfect for Grade 1 students building foundational math skills.",
+                cn: "",
+                es: ""
+            },
             type: "addition",
             defaultRange: 10,
             defaultCount: 20,
