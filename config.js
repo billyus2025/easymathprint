@@ -1,7 +1,8 @@
 // Site-wide configuration (母工厂标准配置)
 const siteConfig = {
     // 基础配置
-    analytics_id: "G-XXXXXXXXXX", // 预留GA4 ID，后续站点可替换
+    ga4: "G-JZ9W1N4G11", // GA4 自动注入系统（100-Site Factory 标准）
+    analytics_id: "G-XXXXXXXXXX", // 预留GA4 ID（兼容旧配置，优先使用 ga4）
     site_url: "https://www.easymathprint.com", // 用于 canonical & sitemap
     enable_pdf_generation: false, // PDF工厂开关（暂时禁用，快速构建）
     enable_social_assets: true, // 社交媒体资产生成开关

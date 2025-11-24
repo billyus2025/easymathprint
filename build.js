@@ -38,6 +38,30 @@ console.log(`🌐 Site URL: ${DOMAIN}`);
 console.log(`📊 Analytics: ${siteConfig.enable_analytics ? 'Enabled' : 'Disabled'}\n`);
 
 // ====================================================================
+// GA4 自动注入系统（100-Site Factory 标准）
+// ====================================================================
+function generateGA4Script() {
+    // 优先使用 ga4 字段，如果没有则回退到 analytics_id（兼容旧配置）
+    const ga4Id = siteConfig.ga4 || siteConfig.analytics_id;
+    
+    // 如果未启用或ID无效，返回空字符串
+    if (!siteConfig.enable_analytics || !ga4Id || ga4Id === "G-XXXXXXXXXX") {
+        return '';
+    }
+    
+    // 生成标准 GA4 代码
+    return `
+    <!-- Google Analytics (GA4) - 100-Site Factory 自动注入 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=${ga4Id}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '${ga4Id}');
+    </script>`;
+}
+
+// ====================================================================
 // 智能图标生成系统（根据slug自动生成主题图标）
 // ====================================================================
 function getIconForSlug(slug) {
@@ -195,19 +219,8 @@ Object.entries(worksheetConfig).forEach(([key, item]) => {
             ? (item.ogImage || `https://via.placeholder.com/1200x630.png?text=${encodeURIComponent(title)}`)
             : (item.ogImage || "https://www.easymathprint.com/assets/og-default.png");
         
-        // 生成GA4脚本（如果启用）
-        let gaScript = '';
-        if (siteConfig.enable_analytics && siteConfig.analytics_id && siteConfig.analytics_id !== "G-XXXXXXXXXX") {
-            gaScript = `
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=${siteConfig.analytics_id}"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', '${siteConfig.analytics_id}');
-    </script>`;
-        }
+        // 生成GA4脚本（使用统一的 GA4 自动注入系统）
+        const gaScript = generateGA4Script();
 
         // ====================================================================
         // 全局安全能力注入：版权签名、指纹、Referrer检测
@@ -549,15 +562,7 @@ function generateHomepageHTML(pageNum, pages, totalPages) {
     <title>${isFirstPage ? 'Free Printable Math Worksheets' : `Page ${pageNum} - Free Printable Math Worksheets`} | EasyMathPrint</title>
     <meta name="description" content="Free printable math worksheets for grades K–5. Includes addition, subtraction, multiplication, division, fractions, and more with full answer keys.">
     <link rel="canonical" href="${canonicalUrl}">
-${relLinks}    ${siteConfig.enable_analytics && siteConfig.analytics_id && siteConfig.analytics_id !== "G-XXXXXXXXXX" ? `
-    <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=${siteConfig.analytics_id}"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', '${siteConfig.analytics_id}');
-    </script>` : ''}
+${relLinks}${generateGA4Script()}
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -651,14 +656,7 @@ if (siteConfig.enable_legal_pages) {
     <title>Privacy Policy | EasyMathPrint</title>
     <meta name="description" content="Privacy Policy for EasyMathPrint.com - Free printable math worksheets.">
     <link rel="canonical" href="${DOMAIN}/privacy-policy/">
-    ${siteConfig.enable_analytics && siteConfig.analytics_id && siteConfig.analytics_id !== "G-XXXXXXXXXX" ? `
-    <script async src="https://www.googletagmanager.com/gtag/js?id=${siteConfig.analytics_id}"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', '${siteConfig.analytics_id}');
-    </script>` : ''}
+${generateGA4Script()}
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
@@ -700,14 +698,7 @@ if (siteConfig.enable_legal_pages) {
     <title>Terms of Service | EasyMathPrint</title>
     <meta name="description" content="Terms of Service for EasyMathPrint.com - Free printable math worksheets.">
     <link rel="canonical" href="${DOMAIN}/terms/">
-    ${siteConfig.enable_analytics && siteConfig.analytics_id && siteConfig.analytics_id !== "G-XXXXXXXXXX" ? `
-    <script async src="https://www.googletagmanager.com/gtag/js?id=${siteConfig.analytics_id}"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', '${siteConfig.analytics_id}');
-    </script>` : ''}
+${generateGA4Script()}
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
@@ -751,14 +742,7 @@ if (siteConfig.enable_legal_pages) {
     <title>Contact Us | EasyMathPrint</title>
     <meta name="description" content="Contact EasyMathPrint.com for questions, feedback, or support.">
     <link rel="canonical" href="${DOMAIN}/contact/">
-    ${siteConfig.enable_analytics && siteConfig.analytics_id && siteConfig.analytics_id !== "G-XXXXXXXXXX" ? `
-    <script async src="https://www.googletagmanager.com/gtag/js?id=${siteConfig.analytics_id}"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', '${siteConfig.analytics_id}');
-    </script>` : ''}
+${generateGA4Script()}
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">

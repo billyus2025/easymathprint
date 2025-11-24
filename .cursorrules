@@ -4,84 +4,60 @@ You are pair programming with the **Factory Owner (User)**.
 Your goal is NOT just to write code, but to build **scalable, automated, and profitable** static websites.
 </identity>
 
+<directory_architecture>
+## GLOBAL IMMUTABLE DIRECTORY RULES (CRITICAL)
+**These rules apply to ALL 100 sites. NEVER deviate.**
+
+1.  **Flat Structure Only**: 
+    - EVERY generated page must exist as: `./[slug]/index.html`
+    - This results in the clean URL: `example.com/[slug]/`
+    
+2.  **Strict Prohibitions (NEVER DO THIS)**:
+    - ❌ NO file extensions in URLs (e.g., `href="/slug.html"` is FORBIDDEN).
+    - ❌ NO nested categories (e.g., `/math/addition/` is FORBIDDEN).
+    - ❌ NO query parameters (e.g., `/?id=slug` is FORBIDDEN).
+    - ❌ NO flat HTML files in root (e.g., `addition.html` is FORBIDDEN).
+
+3.  **Link Consistency**:
+    - In `template.html` and `build.js`, ALL internal links must be formatted as: `href="/[slug]/"` (trailing slash is mandatory).
+
+4.  **Build Logic**:
+    - `build.js` must ALWAYS create a directory matching the slug, then write `index.html` inside it.
+</directory_architecture>
+
 <technology_stack>
-## Mandatory Tech Stack (Do Not Deviate)
+## Mandatory Tech Stack
 1. **Core**: HTML5 (Semantic) + Vanilla JavaScript (ES6+).
-2. **Styling**: **Tailwind CSS (via CDN)** is MANDATORY. Do not use Vanilla CSS unless for print layouts (`@media print`).
+2. **Styling**: **Tailwind CSS (via CDN)** is MANDATORY. Do not use Vanilla CSS unless for print layouts.
    - Use `script src="https://cdn.tailwindcss.com"` in the head.
-   - Use modern Tailwind classes (flex, grid, glassmorphism).
 3. **Automation Engine**: Node.js (`build.js`) + Data Config (`config.js`).
-   - The site MUST be generated via the `node build.js` script.
+   - The site MUST be generated via `node build.js`.
    - Content MUST come from `config.js`.
-   - Never hardcode 100 pages manually. Always use the factory build process.
-4. **No Complex Frameworks**: Do NOT use Next.js, React, or Vite unless explicitly requested. Keep it simple, static, and fast.
+   - Never hardcode pages manually.
+4. **No Complex Frameworks**: Do NOT use Next.js, React, or Vite unless explicitly requested.
 </technology_stack>
 
 <design_aesthetics>
 ## Visual Excellence (US Market Standard)
 1. **Wow Factor**: The design must feel premium, trustworthy, and American-native.
-2. **Color Palette**: Avoid generic blue/red. Use harmonious HSL palettes, soft shadows (`shadow-lg`, `shadow-xl`), and rounded corners (`rounded-xl`).
-3. **Responsiveness**: Mobile-first approach is non-negotiable. The Sidebar must collapse on mobile; the layout must stack vertically.
-4. **Interaction**: Use `hover:scale-105`, `transition-all`, and `cursor-pointer` to make the UI feel alive.
+2. **Color Palette**: Use harmonious HSL palettes, soft shadows (`shadow-lg`), and rounded corners (`rounded-xl`).
+3. **Responsiveness**: Mobile-first approach is non-negotiable.
+4. **Interaction**: Use `hover:scale-105`, `transition-all` to make the UI feel alive.
 </design_aesthetics>
 
 <seo_best_practices>
-## SEO & Monetization (The Money Layer)
-Every page generated MUST have:
+## SEO & Monetization
 1. **Unique Title**: `[Topic] - [Value Prop] | [Brand Name]`
 2. **Meta Description**: Compelling, keyword-rich summary (150-160 chars).
-3. **Canonical Tag**: Self-referencing canonical link to avoid duplicate content penalties.
-4. **Semantic HTML**: Use `<header>`, `<main>`, `<article>`, `<footer>`, `<aside>`.
-5. **Ad Placeholders**: Always reserve space for ads:
-   - Top Banner (728x90)
-   - Sidebar (300x600)
-   - In-content (300x250)
-   - Use `<div class="bg-gray-100 animate-pulse text-gray-400 ...">Ad Space</div>` for placeholders.
+3. **Canonical Tag**: Self-referencing canonical link pointing to `https://domain.com/[slug]/`.
+4. **Semantic HTML**: Use `<header>`, `<main>`, `<article>`, `<footer>`.
+5. **Ad Placeholders**: Always reserve space for ads (Top 728x90, Sidebar 300x600).
 </seo_best_practices>
 
 <factory_workflow>
 ## Implementation Workflow
-When the user asks for a new feature or a new site:
-1. **Analyze Config**: First, check `config.js` to understand the data structure.
-2. **Update Template**: Modify `template.html` for UI changes.
-3. **Update Logic**: Modify `build.js` for generation logic changes.
-4. **Verify**: Always remind the user to run `node build.js` to see changes.
-5. **Commit**: Remind the user to `git push` to trigger GitHub Actions.
+1. **Analyze Config**: Check `config.js` for structure.
+2. **Update Template**: Modify `template.html` for UI.
+3. **Update Logic**: Modify `build.js` to ensure it generates `/slug/index.html`.
+4. **Verify**: Remind user to run `node build.js`.
 </factory_workflow>
-
-<safety_protocols>
-1. **No Broken Links**: Ensure all generated links point to valid directories (`/slug/`) not query params (`?id=`).
-2. **Print Styles**: For tool sites (like Math Print), ensure `@media print` hides all ads, sidebars, and navbars.
-</safety_protocols>
-
-/************************************************************************************
-# 100-Site Factory — Global Immutable Directory Rules (for all sites 001–100)
-
-1) 一级目录（不可修改、不可删除）
-   所有页面必须严格按以下结构生成：
-     /{{slug}}/index.html
-   不允许：
-     /{{slug}}.html
-     /type/{{slug}}/
-     /{{category}}/{{slug}}/
-   任何时候，不得出现第二种目录模式。
-
-2) Slug 必须直接作为目录名
-   也就是说：
-     渲染页面 = dist/{{slug}}/index.html
-   01 号站举例：
-     addition-sums-within-10/    ✔ 正确
-     addition/                   ❌ 永远禁止
-     add/sums10/                 ❌ 永远禁止
-
-3) Template 与 build.js 必须保持目录一致性
-   - build.js 在生成页面前必须检查目录是否存在，如不存在必须创建。
-   - template.html 内的所有链接必须使用：
-       href="/{{slug}}/"
-     严禁：
-       href="/{{slug}}.html"
-
-4) 目录规范是全站群通用规则
-   所有网站（001~100）必须保持绝对一致，不允许任何项目私自修改。
-
-************************************************************************************/
