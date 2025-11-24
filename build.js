@@ -163,27 +163,18 @@ Object.entries(worksheetConfig).forEach(([key, item]) => {
         // 根据slug自动生成主题图标
         const pageIcon = getIconForSlug(slug);
         
+        // ====================================================================
+        // 100-Site Factory — Global Immutable Directory Rules
+        // 强制所有页面使用 /{slug}/index.html 格式
+        // 禁止：/{slug}.html, /type/{slug}/, /{category}/{slug}/
+        // ====================================================================
         let folderPath;
         let canonicalUrl;
         
-        // 路径规则：en 在根目录，其他语言在子目录
-        // 现阶段 lang 固定为 "en"，保持现有英文目录结构不变
-        if (lang === "en") {
-            folderPath = path.join(DIST_DIR, slug);
-            canonicalUrl = `${DOMAIN}/${slug}/`;
-        } else if (lang === "cn") {
-            // 预留未来中文路径逻辑（暂不启用）
-            folderPath = path.join(DIST_DIR, "cn", slug);
-            canonicalUrl = `${DOMAIN}/cn/${slug}/`;
-        } else if (lang === "es") {
-            // 预留未来西班牙语路径逻辑（暂不启用）
-            folderPath = path.join(DIST_DIR, "es", slug);
-            canonicalUrl = `${DOMAIN}/es/${slug}/`;
-        } else {
-            // 其他语言默认在子目录
-            folderPath = path.join(DIST_DIR, lang, slug);
-            canonicalUrl = `${DOMAIN}/${lang}/${slug}/`;
-        }
+        // 严格遵循规则：所有页面必须在根目录，使用 /{slug}/index.html
+        // 即使未来支持多语言，也应该使用不同的slug（如 slug-cn），而不是子目录
+        folderPath = path.join(DIST_DIR, slug);
+        canonicalUrl = `${DOMAIN}/${slug}/`;
 
         const shouldPublish = !item.releaseDate || item.releaseDate <= today;
 

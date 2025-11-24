@@ -53,3 +53,35 @@ When the user asks for a new feature or a new site:
 1. **No Broken Links**: Ensure all generated links point to valid directories (`/slug/`) not query params (`?id=`).
 2. **Print Styles**: For tool sites (like Math Print), ensure `@media print` hides all ads, sidebars, and navbars.
 </safety_protocols>
+
+/************************************************************************************
+# 100-Site Factory — Global Immutable Directory Rules (for all sites 001–100)
+
+1) 一级目录（不可修改、不可删除）
+   所有页面必须严格按以下结构生成：
+     /{{slug}}/index.html
+   不允许：
+     /{{slug}}.html
+     /type/{{slug}}/
+     /{{category}}/{{slug}}/
+   任何时候，不得出现第二种目录模式。
+
+2) Slug 必须直接作为目录名
+   也就是说：
+     渲染页面 = dist/{{slug}}/index.html
+   01 号站举例：
+     addition-sums-within-10/    ✔ 正确
+     addition/                   ❌ 永远禁止
+     add/sums10/                 ❌ 永远禁止
+
+3) Template 与 build.js 必须保持目录一致性
+   - build.js 在生成页面前必须检查目录是否存在，如不存在必须创建。
+   - template.html 内的所有链接必须使用：
+       href="/{{slug}}/"
+     严禁：
+       href="/{{slug}}.html"
+
+4) 目录规范是全站群通用规则
+   所有网站（001~100）必须保持绝对一致，不允许任何项目私自修改。
+
+************************************************************************************/
